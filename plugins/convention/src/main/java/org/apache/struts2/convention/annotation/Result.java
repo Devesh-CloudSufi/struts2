@@ -80,6 +80,9 @@ public @interface Result {
      */
     String location() default "";
 
+    Class actionLocation() default NullActionLocation.class;
+
+
     /**
      * @return  The type of the result. This is usually setup in the struts.xml or struts-plugin.xml
      *          and is a simple name that is mapped to a result Class.
@@ -92,4 +95,9 @@ public @interface Result {
      *          <code>{"key", "value", "key2", "value2"}</code>.
      */
     String[] params() default {};
+
+    static class NullActionLocation {
+
+    }
+
 }
