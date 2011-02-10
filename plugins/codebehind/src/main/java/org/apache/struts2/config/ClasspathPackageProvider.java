@@ -607,7 +607,7 @@ public class ClasspathPackageProvider implements PackageProvider {
                 cls = null;
             }
             final String resultValue;
-            if (result.actionClass() != Result.class ){
+            if (!org.apache.struts2.config.Result.class.equals(result.actionClass())){
                 if (actionLocationProvider == null){
                     throw new IllegalStateException("actionClass specified but no actionLocationProvider configured");
                 }
@@ -615,7 +615,7 @@ public class ClasspathPackageProvider implements PackageProvider {
             } else {
                 resultValue = result.value();
             }
-            return createResultConfig(result.name(), cls, result.value(), createParameterMap(result.params()));
+            return createResultConfig(result.name(), cls, resultValue, createParameterMap(result.params()));
         }
 
         protected Map<String, String> createParameterMap(String[] parms) {
