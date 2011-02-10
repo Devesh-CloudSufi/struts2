@@ -34,9 +34,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Result {
+    public static final String defaultValue = "NOTSET";
     String name() default Action.SUCCESS;
     Class<? extends com.opensymphony.xwork2.Result> type() default NullResult.class;
-    String value();
+    String value() default  defaultValue;
     Class actionClass() default Result.class;
     String[] params() default {};
 }

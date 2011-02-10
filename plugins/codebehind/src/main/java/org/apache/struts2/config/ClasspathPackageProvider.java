@@ -613,9 +613,13 @@ public class ClasspathPackageProvider implements PackageProvider {
                 }
                 resultValue = actionLocationProvider.getLocation( result.actionClass());
             } else {
+                if (Result.defaultValue.equals(result.value())){
+                    throw new IllegalStateException("action has no actionClass and default for value");
+
+                }
                 resultValue = result.value();
             }
-            return createResultConfig(result.name(), cls, resultValue, createParameterMap(result.params()));
+                return createResultConfig(result.name(), cls, resultValue, createParameterMap(result.params()));
         }
 
         protected Map<String, String> createParameterMap(String[] parms) {
