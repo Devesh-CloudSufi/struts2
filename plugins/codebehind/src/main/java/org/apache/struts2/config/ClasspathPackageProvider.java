@@ -37,7 +37,6 @@ import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
 
 import javax.servlet.ServletContext;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -155,6 +154,8 @@ public class ClasspathPackageProvider implements PackageProvider {
      */
     private Configuration configuration;
 
+    private ActionLocationProvider actionLocationProvider;
+
     private String actionPackages;
 
     private ServletContext servletContext;
@@ -185,6 +186,11 @@ public class ClasspathPackageProvider implements PackageProvider {
 
     public void setServletContext(ServletContext ctx) {
         this.servletContext = ctx;
+    }
+
+    @Inject(value= "actionLocationProvider", required=false)
+    public void setActionLocationProvider(ActionLocationProvider actionLocationProvider) {
+        this.actionLocationProvider = actionLocationProvider;
     }
 
     /**
@@ -599,6 +605,15 @@ public class ClasspathPackageProvider implements PackageProvider {
             Class<? extends Object> cls = result.type();
             if (cls == NullResult.class) {
                 cls = null;
+            }
+            final String resultValue;
+            if (result.actionClass() != Result.class ){
+                if (actionLocationProvider == null){
+                    throw new IllegalStateException("actionClass specified but no actionLocationProvider configured");
+                }
+                resultValue = actionLocationProvider.getLocation( result.actionClass());
+            } else {
+                resultValue = result.value();
             }
             return createResultConfig(result.name(), cls, result.value(), createParameterMap(result.params()));
         }

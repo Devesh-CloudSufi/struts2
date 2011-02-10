@@ -37,5 +37,6 @@ public @interface Result {
     String name() default Action.SUCCESS;
     Class<? extends com.opensymphony.xwork2.Result> type() default NullResult.class;
     String value();
+    Class actionClass() default Result.class;
     String[] params() default {};
 }
