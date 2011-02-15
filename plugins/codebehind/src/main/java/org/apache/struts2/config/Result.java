@@ -35,9 +35,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Result {
     public static final String defaultValue = "NOTSET";
+    public static final String AUTOMATIC = "CONVENTION";
     String name() default Action.SUCCESS;
     Class<? extends com.opensymphony.xwork2.Result> type() default NullResult.class;
-    String value() default  defaultValue;
+    String value() default AUTOMATIC;
     Class actionClass() default Result.class;
     String[] params() default {};
 }

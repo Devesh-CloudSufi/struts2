@@ -156,6 +156,8 @@ public class ClasspathPackageProvider implements PackageProvider {
 
     private ActionLocationProvider actionLocationProvider;
 
+    private AnnotatedValueResolver annotatedValueResolver;
+
     private String actionPackages;
 
     private ServletContext servletContext;
@@ -193,6 +195,11 @@ public class ClasspathPackageProvider implements PackageProvider {
         this.actionLocationProvider = actionLocationProvider;
     }
 
+    @Inject(value= "annotatedValueResolver", required=false)
+    public void setAnnotatedValueResolver(AnnotatedValueResolver annotatedValueResolver) {
+        this.annotatedValueResolver = annotatedValueResolver;
+    }
+
     /**
      * Disables action scanning.
      *
@@ -216,7 +223,7 @@ public class ClasspathPackageProvider implements PackageProvider {
     /**
      * Check that the class has an @Action annotation
      *
-     * @param checkImplementsAction True to check
+     * @param checkAnnotation True to check
      */
     @Inject(value=CHECK_ANNOTATION, required=false)
     public void setCheckAnnotation(String checkAnnotation) {
@@ -575,7 +582,7 @@ public class ClasspathPackageProvider implements PackageProvider {
                     // first check here...
                     for (int i = 0; i < results.value().length; i++) {
                         Result result = results.value()[i];
-                        ResultConfig config = createResultConfig(result);
+                        ResultConfig config = createResultConfig(result, actionClass);
 						if (!containsKey((K)config.getName())) {
                             put((K)config.getName(), (V)config);
                         }
@@ -585,7 +592,7 @@ public class ClasspathPackageProvider implements PackageProvider {
                 // what about a single Result annotation?
                 Result result = (Result) actionClass.getAnnotation(Result.class);
                 if (result != null) {
-                    ResultConfig config = createResultConfig(result);
+                    ResultConfig config = createResultConfig(result, actionClass);
                     if (!containsKey((K)config.getName())) {
                         put((K)config.getName(), (V)config);
                     }
@@ -601,7 +608,7 @@ public class ClasspathPackageProvider implements PackageProvider {
          * @param result Result annotation reference representing result type to create
          * @return New or cached ResultConfig object for result
          */
-        protected ResultConfig createResultConfig(Result result) {
+        protected ResultConfig createResultConfig(Result result, Class actionClass) {
             Class<? extends Object> cls = result.type();
             if (cls == NullResult.class) {
                 cls = null;
@@ -617,10 +624,18 @@ public class ClasspathPackageProvider implements PackageProvider {
                     throw new IllegalStateException("action has no actionClass and default for value");
 
                 }
-                resultValue = result.value();
+                if (Result.AUTOMATIC.equals( result.value())){
+                    if (annotatedValueResolver == null){
+                        throw new IllegalStateException("Result.AUTOMATIC specified for value but no annotatedValueResolver configured");
+                    }
+                    resultValue = annotatedValueResolver.getLocation( actionClass);
+                } else {
+                    resultValue = result.value();
+                }
             }
                 return createResultConfig(result.name(), cls, resultValue, createParameterMap(result.params()));
         }
+
 
         protected Map<String, String> createParameterMap(String[] parms) {
             Map<String, String> map = new HashMap<String, String>();
